@@ -4,10 +4,10 @@
   "description": "A pixel art grid-based exploration game",
   "main": "dist/script.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsc --watch & live-server --port=3000 --open=/index.html",
-    "start": "live-server --port=3000 --open=/index.html",
-    "serve": "live-server --port=3000"
+    "build": "tsc && cp src/index.html dist/",
+    "dev": "tsc --watch & live-server dist --port=3000 --open=/index.html",
+    "start": "live-server dist --port=3000 --open=/index.html",
+    "serve": "live-server dist --port=3000"
   },
   "keywords": ["game", "pixel-art", "typescript", "canvas"],
   "author": "",

@@ -62,37 +62,45 @@ node cli.js help # Show CLI help
 ## Technical Details
 
 - **Language**: TypeScript
-- **Rendering**: HTML5 Canvas
+- **Rendering**: Pure HTML5 Canvas (no DOM manipulation)
+- **UI System**: Canvas-based text and button rendering
 - **Build System**: TypeScript Compiler
 - **Development Server**: Live Server
-- **Grid Size**: 20x20 pixels per cell
+- **Grid Size**: Responsive (minimum 20px per cell)
 - **World Size**: 30x20 visible cells
-- **Player**: Fixed center position with world scrolling
+- **Player**: Fixed center position with camera-based world scrolling
 
 ## Project Structure
 
 ```
 pixel-walker/
 ├── src/
-│   └── script.ts      # Main game logic (TypeScript)
+│   ├── components/
+│   │   ├── UIManager.ts      # UI creation and management
+│   │   ├── GameStateManager.ts # Game state and animations
+│   │   ├── Renderer.ts        # Rendering logic and camera
+│   │   └── InputHandler.ts    # User input processing
+│   ├── types.ts              # Type definitions
+│   ├── main.ts               # Main game class
+│   └── index.html            # Game HTML (minimal)
 ├── dist/
-│   └── script.js      # Compiled JavaScript
-├── index.html         # Game HTML
-├── style.css          # Game styles
-├── package.json       # Dependencies and scripts
-├── tsconfig.json      # TypeScript configuration
-├── cli.js            # Command line interface
-└── README.md         # This file
+│   └── *.js                  # Compiled JavaScript
+├── package.json              # Dependencies and scripts
+├── tsconfig.json             # TypeScript configuration
+├── cli.js                   # Command line interface
+└── README.md                # This file
 ```
 
 ## Development
 
-The game is built with TypeScript for better type safety and development experience. The source code is in `src/script.ts` and gets compiled to `dist/script.js`.
+The game is built with TypeScript for better type safety and development experience. The source code is organized in modular components within the `src/` directory and gets compiled to `dist/`.
 
 Key classes:
-- `PixelWalker`: Main game class
-- `GameState`: Interface for game state management
-- `GameConfig`: Interface for game configuration
+- `PixelWalker`: Main game class that orchestrates all components
+- `UIManager`: Handles all UI creation and management
+- `GameStateManager`: Manages game state and animations
+- `Renderer`: Handles rendering logic and camera system
+- `InputHandler`: Manages user input and events
 
 ## License
 
