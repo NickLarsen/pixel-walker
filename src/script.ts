@@ -11,17 +11,26 @@ interface GameConfig {
   worldHeight: number;
 }
 
+interface UIElements {
+  app: HTMLElement;
+  gameContainer: HTMLElement;
+  startScreen: HTMLElement;
+  gameScreen: HTMLElement;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  startGameBtn: HTMLButtonElement;
+  endGameBtn: HTMLButtonElement;
+  moveCounter: HTMLElement;
+  gameMenu: HTMLElement;
+}
+
 class PixelWalker {
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
   private gameState: GameState;
   private config: GameConfig;
   private animationId: number | null = null;
+  private ui: UIElements;
 
   constructor() {
-    this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
-    this.ctx = this.canvas.getContext('2d')!;
-    
     // Game state
     this.gameState = {
       state: 'menu',
@@ -37,8 +46,8 @@ class PixelWalker {
       worldHeight: 20 // Visible world height in cells
     };
     
-    // Canvas setup
-    this.setupCanvas();
+    // Initialize UI
+    this.ui = this.createUI();
     
     // Event listeners
     this.setupEventListeners();
@@ -47,21 +56,109 @@ class PixelWalker {
     this.init();
   }
   
-  private setupCanvas(): void {
-    this.canvas.width = this.config.worldWidth * this.config.gridSize;
-    this.canvas.height = this.config.worldHeight * this.config.gridSize;
+  private createUI(): UIElements {
+    // Get the app container
+    const app = document.getElementById('app') as HTMLElement;
+    if (!app) {
+      throw new Error('App container not found');
+    }
+
+    // Create game container
+    const gameContainer = document.createElement('div');
+    gameContainer.id = 'game-container';
+    app.appendChild(gameContainer);
+
+    // Create start screen
+    const startScreen = document.createElement('div');
+    startScreen.id = 'start-screen';
+    startScreen.className = 'screen active';
+    
+    const startMenuBox = document.createElement('div');
+    startMenuBox.className = 'menu-box';
+    
+    const startTitle = document.createElement('h1');
+    startTitle.textContent = 'Pixel Walker';
+    
+    const startGameBtn = document.createElement('button');
+    startGameBtn.id = 'start-game-btn';
+    startGameBtn.textContent = 'Start Game';
+    
+    startMenuBox.appendChild(startTitle);
+    startMenuBox.appendChild(startGameBtn);
+    startScreen.appendChild(startMenuBox);
+    gameContainer.appendChild(startScreen);
+
+    // Create game screen
+    const gameScreen = document.createElement('div');
+    gameScreen.id = 'game-screen';
+    gameScreen.className = 'screen';
+    
+    // Create game UI
+    const gameUI = document.createElement('div');
+    gameUI.id = 'game-ui';
+    
+    const moveCounter = document.createElement('div');
+    moveCounter.id = 'move-counter';
+    moveCounter.textContent = 'Moves: 0';
+    
+    const gameMenu = document.createElement('div');
+    gameMenu.id = 'game-menu';
+    gameMenu.className = 'hidden';
+    
+    const gameMenuBox = document.createElement('div');
+    gameMenuBox.className = 'menu-box';
+    
+    const gameMenuTitle = document.createElement('h2');
+    gameMenuTitle.textContent = 'Game Menu';
+    
+    const endGameBtn = document.createElement('button');
+    endGameBtn.id = 'end-game-btn';
+    endGameBtn.textContent = 'End Game';
+    
+    gameMenuBox.appendChild(gameMenuTitle);
+    gameMenuBox.appendChild(endGameBtn);
+    gameMenu.appendChild(gameMenuBox);
+    
+    gameUI.appendChild(moveCounter);
+    gameUI.appendChild(gameMenu);
+    
+    // Create canvas
+    const canvas = document.createElement('canvas');
+    canvas.id = 'game-canvas';
+    
+    gameScreen.appendChild(gameUI);
+    gameScreen.appendChild(canvas);
+    gameContainer.appendChild(gameScreen);
+
+    // Get canvas context
+    const ctx = canvas.getContext('2d')!;
+    
+    // Setup canvas
+    canvas.width = this.config.worldWidth * this.config.gridSize;
+    canvas.height = this.config.worldHeight * this.config.gridSize;
+
+    return {
+      app,
+      gameContainer,
+      startScreen,
+      gameScreen,
+      canvas,
+      ctx,
+      startGameBtn,
+      endGameBtn,
+      moveCounter,
+      gameMenu
+    };
   }
   
   private setupEventListeners(): void {
     // Start game button
-    const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
-    startBtn.addEventListener('click', () => {
+    this.ui.startGameBtn.addEventListener('click', () => {
       this.startGame();
     });
     
     // End game button
-    const endBtn = document.getElementById('end-game-btn') as HTMLButtonElement;
-    endBtn.addEventListener('click', () => {
+    this.ui.endGameBtn.addEventListener('click', () => {
       this.endGame();
     });
     
@@ -147,24 +244,15 @@ class PixelWalker {
   }
   
   private toggleGameMenu(): void {
-    const gameMenu = document.getElementById('game-menu');
-    if (gameMenu) {
-      gameMenu.classList.toggle('hidden');
-    }
+    this.ui.gameMenu.classList.toggle('hidden');
   }
   
   private hideGameMenu(): void {
-    const gameMenu = document.getElementById('game-menu');
-    if (gameMenu) {
-      gameMenu.classList.add('hidden');
-    }
+    this.ui.gameMenu.classList.add('hidden');
   }
   
   private updateMoveCounter(): void {
-    const moveCounter = document.getElementById('move-counter');
-    if (moveCounter) {
-      moveCounter.textContent = `Moves: ${this.gameState.moveCount}`;
-    }
+    this.ui.moveCounter.textContent = `Moves: ${this.gameState.moveCount}`;
   }
   
   // Generate a pseudo-random color variation for each cell
@@ -190,8 +278,8 @@ class PixelWalker {
   
   private render(): void {
     // Clear canvas
-    this.ctx.fillStyle = '#000000';
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ui.ctx.fillStyle = '#000000';
+    this.ui.ctx.fillRect(0, 0, this.ui.canvas.width, this.ui.canvas.height);
     
     // Calculate the top-left corner of the visible world
     const startX = this.gameState.playerWorldX - Math.floor(this.config.worldWidth / 2);
@@ -204,8 +292,8 @@ class PixelWalker {
         const worldY = startY + y;
         
         // Draw grid cell
-        this.ctx.fillStyle = this.getCellColor(worldX, worldY);
-        this.ctx.fillRect(
+        this.ui.ctx.fillStyle = this.getCellColor(worldX, worldY);
+        this.ui.ctx.fillRect(
           x * this.config.gridSize,
           y * this.config.gridSize,
           this.config.gridSize,
@@ -213,9 +301,9 @@ class PixelWalker {
         );
         
         // Draw grid lines
-        this.ctx.strokeStyle = '#333333';
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeRect(
+        this.ui.ctx.strokeStyle = '#333333';
+        this.ui.ctx.lineWidth = 1;
+        this.ui.ctx.strokeRect(
           x * this.config.gridSize,
           y * this.config.gridSize,
           this.config.gridSize,
@@ -228,8 +316,8 @@ class PixelWalker {
     const centerX = Math.floor(this.config.worldWidth / 2);
     const centerY = Math.floor(this.config.worldHeight / 2);
     
-    this.ctx.fillStyle = '#ffff00'; // Bright yellow
-    this.ctx.fillRect(
+    this.ui.ctx.fillStyle = '#ffff00'; // Bright yellow
+    this.ui.ctx.fillRect(
       centerX * this.config.gridSize + 2,
       centerY * this.config.gridSize + 2,
       this.config.gridSize - 4,
@@ -237,15 +325,15 @@ class PixelWalker {
     );
     
     // Add a subtle glow effect to the player
-    this.ctx.shadowColor = '#ffff00';
-    this.ctx.shadowBlur = 10;
-    this.ctx.fillRect(
+    this.ui.ctx.shadowColor = '#ffff00';
+    this.ui.ctx.shadowBlur = 10;
+    this.ui.ctx.fillRect(
       centerX * this.config.gridSize + 2,
       centerY * this.config.gridSize + 2,
       this.config.gridSize - 4,
       this.config.gridSize - 4
     );
-    this.ctx.shadowBlur = 0;
+    this.ui.ctx.shadowBlur = 0;
   }
   
   private gameLoop(): void {
