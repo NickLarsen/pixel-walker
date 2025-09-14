@@ -1,0 +1,20 @@
+{
+  "name": "pixel-walker",
+  "version": "1.0.0",
+  "description": "A pixel art grid-based exploration game",
+  "main": "dist/script.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch & live-server --port=3000 --open=/index.html",
+    "start": "live-server --port=3000 --open=/index.html",
+    "serve": "live-server --port=3000"
+  },
+  "keywords": ["game", "pixel-art", "typescript", "canvas"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "live-server": "^1.2.2",
+    "@types/node": "^20.10.0"
+  }
+}
